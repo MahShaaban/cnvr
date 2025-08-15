@@ -1,0 +1,7 @@
+NOTICE: All program notification/warning messages that appear in STDERR will be also written to log file data-raw/output/offspring.log
+NOTICE: Reading marker coordinates and population frequency of B allele (PFB) from data-raw/PennCNV/example/example.pfb ... Done with 93125 records
+NOTICE: Reading LRR and BAF values for from data-raw/PennCNV/example/offspring.txt ... Done with 93125 records in 4 chromosomes (4 records are discarded due to lack of PFB information for the markers)
+NOTICE: Data from chromosome X will not be used in analysis
+NOTICE: Median-adjusting LRR values for all autosome markers from data-raw/PennCNV/example/offspring.txt by -0.0087
+NOTICE: Median-adjusting BAF values for all autosome markers from data-raw/PennCNV/example/offspring.txt by 0.0260
+NOTICE: quality summary for data-raw/PennCNV/example/offspring.txt: LRR_mean=0.0028 LRR_median=0.0000 LRR_SD=0.1263 BAF_mean=0.5045 BAF_median=0.5000 BAF_SD=0.0429 BAF_DRIFT=0.000293 WF=-0.0173 GCWF=-0.0101

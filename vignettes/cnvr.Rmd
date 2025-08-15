@@ -1,0 +1,112 @@
+---
+title: "Visualizing CNV usign cnvr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizing CNV usign cnvr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(cnvr)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(org.Hs.eg.db)
+```
+
+```{r read_cnv}
+fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+cnv <- read_cnv(fl, col_names)
+```
+
+```{r plot_heatmap, fig.align = 'center', out.width='80%'}
+plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
+```
+
+```{r get_genemodel}
+# get gene model
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+org <- org.Hs.eg.db
+gene_model <- get_genemodel(txdb, org, 'OR4C11')
+```
+
+```{r read_signal}
+# signal
+fl <- system.file('extdata/offspring.txt', package = 'cnvr')
+col_names <- c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
+signal <- read_signal(fl, col_names)
+```
+
+```{r get_overlap}
+# get the overlap
+loss <- cnv[cnv$cn == 0]
+ol <- get_overlap(loss, signal, flank = 10000)
+length(ol)
+```
+
+```{r plot_signal_png, echo=FALSE, fig.align = 'center', out.width='70%'}
+lrr <- 'cnvr_files/lrr.png'
+png(filename = lrr)
+plot_signal(ol, gene_model, type = 'LRR')
+dev.off()
+knitr::include_graphics(lrr)
+
+baf <- 'cnvr_files/baf.png'
+png(filename = baf)
+plot_signal(ol, gene_model, type = 'BAF')
+dev.off()
+knitr::include_graphics(baf)
+```
+
+
+```{r plot_signal, eval=FALSE, fig.align = 'center', out.width='70%'}
+plot_signal(ol, gene_model, type = 'LRR')
+plot_signal(ol, gene_model, type = 'BAF')
+```
+
+
+```{r plot_signal2, eval=FALSE, fig.align = 'center', out.width='70%'}
+gain <- cnv[cnv$cn == 1]
+fl <- system.file('extdata/mother.txt', package = 'cnvr')
+col_names <- c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
+signal <- read_signal(fl, col_names)
+
+# get the overlap
+ol <- get_overlap(gain, signal)
+
+plot_signal(ol, gene_model, type = 'LRR', ylab = 'LRR')
+plot_signal(ol, gene_model, type = 'BAF')
+```
+
+```{r all_cnv, eval=FALSE, fig.align = 'center', out.width='70%'}
+fl <- system.file('extdata/offspring.txt', package = 'cnvr')
+col_names <- c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
+signal <- read_signal(fl, col_names)
+
+# cnv
+fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+cnv <- read_cnv(fl, col_names)
+cnv <- cnv[cnv$sample == 'data-raw/PennCNV/example/offspring.txt']
+cnv <- cnv[cnv$gene != 'NOT_FOUND']
+
+# get the overlap
+for (i in 1:length(cnv)) {
+  gene <- unlist(strsplit(cnv[i]$gene, ','))
+  gene_models <- get_genemodel(txdb, org, gene)
+  
+  ol <- get_overlap(cnv[i], signal, flank = GenomicRanges::width(cnv[i])/2)
+  plot_signal(ol, 
+              type = 'LRR', ylab = 'LRR', 
+              gene_model = gene_models,
+              ylim = c(-2, 2))
+}
+```
+

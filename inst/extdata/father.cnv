@@ -1,0 +1,5 @@
+chr3:37940970-37944758        numsnp=3      length=3,789       state2,cn=1 data-raw/PennCNV/example/father.txt startsnp=rs9837352 endsnp=rs9844203 conf=15.133
+chr3:75379524-75519068        numsnp=7      length=139,545     state2,cn=1 data-raw/PennCNV/example/father.txt startsnp=rs4677005 endsnp=rs2004089 conf=26.863
+chr3:152629693-152637456      numsnp=6      length=7,764       state2,cn=1 data-raw/PennCNV/example/father.txt startsnp=rs2203686 endsnp=rs1517241 conf=12.564
+chr11:81792950-81806219       numsnp=9      length=13,270      state2,cn=1 data-raw/PennCNV/example/father.txt startsnp=rs7947005 endsnp=rs12293984 conf=35.081
+chr20:10511631-10583260       numsnp=10     length=71,630      state2,cn=1 data-raw/PennCNV/example/father.txt startsnp=rs8114269 endsnp=rs682562 conf=39.413
