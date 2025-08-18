@@ -6,9 +6,11 @@
 #' the number of affected genes in each sample on the top.
 #'
 #' @param cnv A GRanges object such as the one created using `read_cnv`
+#' @param top_samples An integer. The number of top samples to plot
+#' @param top_genes An integer. The number of top genes to plot
 #' @param ... Other arguments passed to `Heatmap`
 #'
-#' @importFrom tidyr unnest
+#' @importFrom tidyr unnest separate
 #' @importFrom dplyr filter mutate
 #' @importFrom reshape2 acast
 #' @importFrom grid gpar
@@ -21,18 +23,32 @@
 #' cnv <- read_cnv(fl, col_names)
 #'
 #' # plot heatmap
-#' plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
+#' plot_heatmap(cnv)
 #'
 #' @export
-plot_heatmap <- function(cnv, ...) {
+plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
   # tidy cnv
   cnv <- as.data.frame(cnv)
+
+  # clean sample name
+  cnv <- separate(cnv, sample, into = c('cohort', 'sample'), sep = '\\.')
+
+  # clean gene names
   cnv <- transform(cnv, gene = strsplit(gene, ','))
   cnv <- unnest(cnv, gene)
   cnv <- filter(cnv, gene != 'NOT_FOUND')
   cnv <- mutate(cnv, cn = ifelse(cn > 2, 'loss', 'gain'))
 
-  # heatmap
+  # subset to top_samples & top_genes
+  if (is.null(top_genes)) top_genes <- length(unique(cnv$gene))
+  top_genes <- head(names(sort(table(cnv$gene), decreasing = TRUE)), top_genes)
+
+  cnv <- filter(cnv, gene %in% top_genes)
+
+  if (is.null(top_samples)) top_samples <- length(unique(cnv$sample))
+  top_samples <- head(names(sort(table(cnv$sample), decreasing = TRUE)), top_samples)
+  cnv <- filter(cnv, sample %in% top_samples)
+
   # columns: sample_count
   sample_count <- table(cnv$sample)
   ca <- columnAnnotation(
@@ -41,6 +57,7 @@ plot_heatmap <- function(cnv, ...) {
 
   # rows: gene_count
   gene_count <- table(cnv$gene)
+
   ra <- rowAnnotation(
     '# Variants' = anno_barplot(as.integer(gene_count))
   )
@@ -58,7 +75,6 @@ plot_heatmap <- function(cnv, ...) {
   colors <- c("darkblue", "white", "darkred", 'black')
   names(colors) <- c('loss', 'none', 'gain', 'gain,loss')
 
-
   # plot
   Heatmap(
     heat_matrix,
@@ -66,7 +82,7 @@ plot_heatmap <- function(cnv, ...) {
     left_annotation = ra,
     top_annotation = ca,
     name = 'CNV',
-    rect_gp = grid::gpar(col = "white", lwd = 2),
+    # rect_gp = grid::gpar(col = "white", lwd = 2),
     ...
   )
 }

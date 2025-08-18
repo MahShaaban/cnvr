@@ -116,6 +116,8 @@ read_pfb <- function(file, col_names = NULL, as.granges = FALSE, style = 'UCSC',
 #' edited using the `col_names` argument.
 #'
 #' @inheritParams read_signal
+#' @param numeric_columns A character vector. Columns to clean as numeric
+#' @param character_columns A character vector. Columns to clean as character
 #' @param tidy Default TRUE.
 #'
 #' @examples
@@ -134,13 +136,15 @@ read_pfb <- function(file, col_names = NULL, as.granges = FALSE, style = 'UCSC',
 #'
 #' @export
 read_cnv <- function(file, col_names = FALSE, tidy = TRUE, as.granges = TRUE,
+                     numeric_columns = c('numsnp', 'length', 'cn', 'conf'),
+                     character_columns = c('startsnp', 'endsnp'),
                      style = 'UCSC', ...) {
   # read tsv file
   d <- readr::read_table(file, col_names = col_names, ...)
 
   if ( tidy ) {
-    d <- mutate_at(d, vars('numsnp', 'length', 'cn', 'conf'), ~clean_field(.x))
-    d <- mutate_at(d, vars('startsnp', 'endsnp'), ~clean_field(.x, FALSE))
+    d <- mutate_at(d, vars(numeric_columns), ~clean_field(.x))
+    d <- mutate_at(d, vars(character_columns), ~clean_field(.x, FALSE))
 
     d <- separate(d, region, into = c('chrom', 'start', 'end'), remove = FALSE)
     d <- mutate_at(d, vars('start', 'end'), as.integer)

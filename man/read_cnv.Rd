@@ -9,6 +9,8 @@ read_cnv(
   col_names = FALSE,
   tidy = TRUE,
   as.granges = TRUE,
+  numeric_columns = c("numsnp", "length", "cn", "conf"),
+  character_columns = c("startsnp", "endsnp"),
   style = "UCSC",
   ...
 )
@@ -21,6 +23,10 @@ read_cnv(
 \item{tidy}{Default TRUE.}
 
 \item{as.granges}{Default TRUE.}
+
+\item{numeric_columns}{A character vector. Columns to clean as numeric}
+
+\item{character_columns}{A character vector. Columns to clean as character}
 
 \item{style}{Default 'UCSC'}
 

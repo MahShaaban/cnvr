@@ -4,10 +4,14 @@
 \alias{plot_heatmap}
 \title{Plot Heatmap}
 \usage{
-plot_heatmap(cnv, ...)
+plot_heatmap(cnv, top_samples = NULL, top_genes = NULL, ...)
 }
 \arguments{
 \item{cnv}{A GRanges object such as the one created using `read_cnv`}
+
+\item{top_samples}{An integer. The number of top samples to plot}
+
+\item{top_genes}{An integer. The number of top genes to plot}
 
 \item{...}{Other arguments passed to `Heatmap`}
 }
@@ -24,6 +28,6 @@ col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp
 cnv <- read_cnv(fl, col_names)
 
 # plot heatmap
-plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
+plot_heatmap(cnv)
 
 }
