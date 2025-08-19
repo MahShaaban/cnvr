@@ -19,7 +19,7 @@
 #' @examples
 #' # locate and read cnv file
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
 #'
 #' # plot heatmap
@@ -117,7 +117,7 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #'
 #' # cnv
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
 #' cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
 #'
@@ -179,7 +179,7 @@ plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, .
 #'
 #' # cnv
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+#' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
 #' cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
 #' cnv$gene <- 'OR4C11'
