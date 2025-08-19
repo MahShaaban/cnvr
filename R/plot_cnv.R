@@ -37,7 +37,11 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
   cnv <- transform(cnv, gene = strsplit(gene, ','))
   cnv <- unnest(cnv, gene)
   cnv <- filter(cnv, gene != 'NOT_FOUND')
-  cnv <- mutate(cnv, cn = ifelse(cn > 2, 'loss', 'gain'))
+  cnv <- mutate(cnv, cn = dplyr::case_when(
+    cn == 2 ~ 'none',
+    cn < 2 ~ 'loss',
+    cn > 2 ~ 'gain'
+  ))
 
   # subset to top_samples & top_genes
   if (is.null(top_genes)) top_genes <- length(unique(cnv$gene))
