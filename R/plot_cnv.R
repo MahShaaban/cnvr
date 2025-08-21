@@ -13,14 +13,16 @@
 #' @importFrom tidyr unnest separate
 #' @importFrom dplyr filter mutate
 #' @importFrom reshape2 acast
-#' @importFrom grid gpar
+#' @importFrom grid gpar unit
 #' @importFrom ComplexHeatmap columnAnnotation rowAnnotation anno_barplot Heatmap
+#' @importFrom circlize colorRamp2
 #'
 #' @examples
 #' # locate and read cnv file
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
 #' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
+#' cnv <- cnv[cnv$gene != 'NOT_FOUND']
 #'
 #' # plot heatmap
 #' plot_heatmap(cnv)
@@ -29,26 +31,15 @@
 plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
   # tidy cnv
   cnv <- as.data.frame(cnv)
-
-  # clean sample name
-  cnv <- separate(cnv, sample, into = c('cohort', 'sample'), sep = '\\.')
-
-  # clean gene names
   cnv <- transform(cnv, gene = strsplit(gene, ','))
   cnv <- unnest(cnv, gene)
-  cnv <- filter(cnv, gene != 'NOT_FOUND')
-  cnv <- mutate(cnv, cn = dplyr::case_when(
-    cn == 2 ~ 'none',
-    cn < 2 ~ 'loss',
-    cn > 2 ~ 'gain'
-  ))
 
-  # subset to top_samples & top_genes
+  # subset to top_genes
   if (is.null(top_genes)) top_genes <- length(unique(cnv$gene))
   top_genes <- head(names(sort(table(cnv$gene), decreasing = TRUE)), top_genes)
-
   cnv <- filter(cnv, gene %in% top_genes)
 
+  # subset to top_samples
   if (is.null(top_samples)) top_samples <- length(unique(cnv$sample))
   top_samples <- head(names(sort(table(cnv$sample), decreasing = TRUE)), top_samples)
   cnv <- filter(cnv, sample %in% top_samples)
@@ -56,14 +47,16 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
   # columns: sample_count
   sample_count <- table(cnv$sample)
   ca <- columnAnnotation(
-    '# Samples' = anno_barplot(as.integer(sample_count))
+    '# Samples' = anno_barplot(as.integer(sample_count)),
+    annotation_height = unit(1, 'in')
   )
 
   # rows: gene_count
   gene_count <- table(cnv$gene)
 
   ra <- rowAnnotation(
-    '# Variants' = anno_barplot(as.integer(gene_count))
+    '# Variants' = anno_barplot(as.integer(gene_count)),
+    annotation_width = unit(1, 'in')
   )
 
   # heatmap: cnvs
@@ -71,22 +64,29 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
     cnv,
     gene ~ sample,
     value.var = 'cn',
-    fill = 'none',
-    fun.aggregate = function(x) paste(sort(unique(x)), collapse = ',')
+    fill = 2,
   )
 
   # colors
-  colors <- c("darkblue", "white", "darkred", 'black')
-  names(colors) <- c('loss', 'none', 'gain', 'gain,loss')
+  colors <- colorRamp2(
+    breaks = c(1,2,3),
+    colors = c("darkblue", "white", "darkred")
+  )
 
   # plot
   Heatmap(
     heat_matrix,
     col = colors,
-    left_annotation = ra,
+    right_annotation = ra,
     top_annotation = ca,
-    name = 'CNV',
-    # rect_gp = grid::gpar(col = "white", lwd = 2),
+    rect_gp = grid::gpar(col = "white", lwd = 2),
+    show_row_dend = FALSE,
+    show_column_dend = FALSE,
+    heatmap_legend_param = list(
+      title = "CNV",
+      at = c(1,2,3),
+      labels = c(1,2,3)
+    ),
     ...
   )
 }
@@ -106,9 +106,10 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #'
 #' @examples
 #' # get gene model
+#' gene <- 'SLX4IP'
 #' txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
 #' org <- org.Hs.eg.db::org.Hs.eg.db
-#' gene_model <- get_genemodel(txdb, org, 'OR4C11')
+#' gene_model <- get_genemodel(txdb, org, gene)
 #'
 #' # signal
 #' fl <- system.file('extdata/offspring.txt', package = 'cnvr')
@@ -119,11 +120,17 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
 #' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
-#' cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
+#'
+#' sample <- "data-raw/PennCNV/example/offspring.txt"
+#' cn <- 1
+#'
+#' cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
+#' cnv$gene <- gene
 #'
 #' # get the overlap
-#' ol <- get_overlap(cnv, signal, flank = 5000)
+#' ol <- get_overlap(cnv, signal, flank = 200000)
 #'
+#' # plot
 #' plot_signal(ol, type = 'LRR', gene_model)
 #' plot_signal(ol, type = 'BAF', gene_model)
 #'
@@ -150,11 +157,11 @@ plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, .
     layout(matrix(c(1,2)), heights = c(2, 1))
 
     # plot signal
-    par(mar = c(1,5,1,1))
+    par(mar = c(.5,5,5,1))
     plot(x, y, xlab = '', xaxt = 'n', ...)
 
     # plot gene
-    par(mar = c(5,5,1,1))
+    par(mar = c(5,5,.5,1))
     xlim <- c(min(d$start), max(d$end))
     plot_gene(gene_model, xlim)
   } else {
@@ -181,8 +188,6 @@ plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, .
 #' fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
 #' col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 #' cnv <- read_cnv(fl, col_names)
-#' cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
-#' cnv$gene <- 'OR4C11'
 #'
 #' get_overlap(cnv, signal)
 #'

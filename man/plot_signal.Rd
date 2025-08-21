@@ -25,9 +25,10 @@ panel.
 }
 \examples{
 # get gene model
+gene <- 'SLX4IP'
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
 org <- org.Hs.eg.db::org.Hs.eg.db
-gene_model <- get_genemodel(txdb, org, 'OR4C11')
+gene_model <- get_genemodel(txdb, org, gene)
 
 # signal
 fl <- system.file('extdata/offspring.txt', package = 'cnvr')
@@ -36,13 +37,19 @@ signal <- read_signal(fl, col_names)
 
 # cnv
 fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 cnv <- read_cnv(fl, col_names)
-cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
+
+sample <- "data-raw/PennCNV/example/offspring.txt"
+cn <- 1
+
+cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
+cnv$gene <- gene
 
 # get the overlap
-ol <- get_overlap(cnv, signal, flank = 5000)
+ol <- get_overlap(cnv, signal, flank = 200000)
 
+# plot
 plot_signal(ol, type = 'LRR', gene_model)
 plot_signal(ol, type = 'BAF', gene_model)
 

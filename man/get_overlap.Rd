@@ -23,10 +23,8 @@ signal <- read_signal(fl, col_names)
 
 # cnv
 fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 cnv <- read_cnv(fl, col_names)
-cnv <- cnv[grepl('OR4C11', cnv$gene) & cnv$cn == 0]
-cnv$gene <- 'OR4C11'
 
 get_overlap(cnv, signal)
 

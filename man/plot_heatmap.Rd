@@ -24,8 +24,9 @@ the number of affected genes in each sample on the top.
 \examples{
 # locate and read cnv file
 fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 cnv <- read_cnv(fl, col_names)
+cnv <- cnv[cnv$gene != 'NOT_FOUND']
 
 # plot heatmap
 plot_heatmap(cnv)
