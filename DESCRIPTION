@@ -22,7 +22,6 @@ Imports:
   GenomeInfoDb,
   GenomicFeatures,
   GenomicRanges,
-  CNVRanger,
   IRanges,
   ComplexHeatmap,
   grid,
