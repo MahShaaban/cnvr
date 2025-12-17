@@ -39,12 +39,12 @@ knitr::include_graphics(hm)
 plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
 ```
 
-
 ```{r get_genemodel}
 # get gene model
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 org <- org.Hs.eg.db
-gene_model <- get_genemodel(txdb, org, 'CTDSPL')
+gene <- 'SLX4IP'
+gene_model <- get_genemodel(txdb, org, gene)
 ```
 
 ```{r read_signal}
@@ -55,10 +55,13 @@ signal <- read_signal(fl, col_names)
 ```
 
 ```{r get_overlap}
+sample <- "data-raw/PennCNV/example/offspring.txt"
+cn <- 1
+cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
+cnv$gene <- gene
+
 # get the overlap
-loss <- cnv[cnv$cn == 1]
-ol <- get_overlap(loss, signal, flank = 10000)
-length(ol)
+ol <- get_overlap(cnv, signal, flank = 200000)
 ```
 
 ```{r plot_signal_png, echo=FALSE, fig.align = 'center', out.width='70%'}
