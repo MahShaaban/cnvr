@@ -155,14 +155,14 @@ plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, .
 
     # create a 1 x 2 layout
     layout(matrix(c(1,2)), heights = c(2, 1))
+    xlim <- c(min(d$start), max(d$end))
 
     # plot signal
     par(mar = c(.5,5,5,1))
-    plot(x, y, xlab = '', xaxt = 'n', ...)
+    plot(x, y, xlim = xlim, xlab = '', xaxt = 'n', ...)
 
     # plot gene
     par(mar = c(5,5,.5,1))
-    xlim <- c(min(d$start), max(d$end))
     plot_gene(gene_model, xlim)
   } else {
     # plot signal only when plot_gene = FALSE
