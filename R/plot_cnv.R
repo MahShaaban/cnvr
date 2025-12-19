@@ -101,6 +101,7 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' @param cnv A `GRanges` object.
 #' @param type Default `'LRR'`. Other accepted signals are `'BAF'`
 #' @param gene_model A `GRanges` object.
+#' @param bands A `GRanges` object.
 #' @param ... Other arguemnts passed to `plot`
 #'
 #' @examples
@@ -134,7 +135,7 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #'
 #' @export
 plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
-                        gene_model = NULL, ...) {
+                        gene_model = NULL, bands = NULL, ...) {
   # get the overlap
   gr <- get_overlap(cnv, signal, flank)
 
@@ -158,14 +159,24 @@ plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
 
     # plot signal
     par(mar = c(.5,5,5,1))
-    plot(x, y, xlim = xlim, xlab = '', xaxt = 'n', ...)
+    plot(x, y, xlim = xlim, xlab = '', xaxt = 'n', type = 'n', ...)
+    if ( !is.null(bands) ) {
+      plot_bands(bands)
+    }
+
+    points(x, y, ...)
 
     # plot gene
     par(mar = c(5,5,.5,1))
     plot_gene(gene_model, xlim)
   } else {
     # plot signal only when plot_gene = FALSE
-    plot(x, y, ...)
+    plot(x, y, type = 'n', ...)
+    if ( !is.null(bands) ) {
+      plot_bands(bands)
+    }
+
+    points(x, y, ...)
   }
 }
 
@@ -313,4 +324,48 @@ plot_gene <- function(gr, xlim, ...) {
       segments(x0 = mid, y0 = y + .7, x1 = end, y1 = y + .3)
     }
   })
+}
+
+#' Plot cytobands
+#'
+#' @param gr A GRanges object
+#' @param shade A Logical, default TRUE. Shade bands
+#' @param names A Logical, default TRUE. Plot band names
+#'
+#' @return A plot
+#'
+#' @examples
+#' x <- 1:10
+#' set.seed(1234)
+#' y <- rnorm(10)
+#' b <- tibble::tibble(
+#'   chrom = rep('chr1', 3),
+#'   start = c(1, 4, 8),
+#'   end = c(4, 8, 10),
+#'   band = c('p1', 'p2', 'p3'),
+#'   stain = c('gneg', 'gpos', 'gneg')
+#' )
+#' plot(x, y, type = 'n')
+#' plot_bands(b)
+#' points(x, y)
+#'
+#' @export
+plot_bands <- function(gr, shade = TRUE, names = TRUE) {
+  b <- as.data.frame(gr)
+  if ( shade ) {
+    shade <- c('white', 'gray')[as.factor(b$stain)]
+  } else {
+    shade <- NULL
+  }
+
+  if ( names ) {
+    center <- (b$start+b$end) / 2
+    nms <- b$band
+  } else {
+    center <- (b$start+b$end) / 2
+    nms <- ''
+  }
+
+  rect(b$start, -10, b$end, 10, col = shade)
+  mtext(nms, at = center)
 }
