@@ -93,12 +93,12 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 
 #' Plot Signal
 #'
-#' Plots the position in the `gr` object at the x-axis and a metadata column at
-#' the y-axis: lrr or baf. When `plot_gene = TRUE` a GRanges object with the
-#' gene model is expected and plotted using `plot_gene` underneath the signal
-#' panel.
+#' Plots the position in the `signal` `GRanges` object at the x-axis and a
+#' metadata column at the y-axis: lrr or baf. When `plot_gene = TRUE` a `GRanges`
+#' object with the gene model when provided.
 #'
-#' @param gr A `GRanges` object.
+#' @param signal A `GRanges` object.
+#' @param cnv A `GRanges` object.
 #' @param type Default `'LRR'`. Other accepted signals are `'BAF'`
 #' @param gene_model A `GRanges` object.
 #' @param ... Other arguemnts passed to `plot`
@@ -126,15 +126,18 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
 #' cnv$gene <- gene
 #'
-#' # get the overlap
-#' ol <- get_overlap(cnv, signal, flank = 200000)
+#' flank <- 200000
 #'
 #' # plot
-#' plot_signal(ol, type = 'LRR', gene_model)
-#' plot_signal(ol, type = 'BAF', gene_model)
+#' plot_signal(signal, cnv, flank, type = 'LRR', gene_model)
+#' plot_signal(signal, cnv, flank, type = 'BAF', gene_model)
 #'
 #' @export
-plot_signal <- function(gr, type = 'LRR', gene_model = NULL, ...) {
+plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
+                        gene_model = NULL, ...) {
+  # get the overlap
+  gr <- get_overlap(cnv, signal, flank)
+
   # extract position, x
   d <- as.data.frame(gr)
   x <- as.integer(d$start)
