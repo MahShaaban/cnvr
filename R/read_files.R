@@ -110,6 +110,39 @@ read_pfb <- function(file, col_names = NULL, as.granges = FALSE, style = 'UCSC',
   return(d)
 }
 
+#' Read cytoBands file
+#'
+#' Expects a tab separate file with at 5 columns: chrom, start, end, band, stain.
+#'
+#' @inheritParams read_signal
+#' @param as.granges Default TRUE.
+#'
+#' @examples
+#' # locate cytobands file
+#' fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
+#'
+#' # read cytobands file
+#' read_cytobands(fl)
+#'
+#' @importFrom readr read_tsv
+#' @importFrom GenomicRanges makeGRangesFromDataFrame sort
+#' @importFrom GenomeInfoDb `seqlevelsStyle<-` seqlevelsStyle
+#'
+#' @export
+read_cytobands <- function(file, as.granges = TRUE, style = 'UCSC', ...) {
+  # read tsv file
+  d <- read_tsv(file, col_names = c('chrom', 'start', 'end', 'band', 'stain'))
+
+  if ( as.granges ) {
+    # create a GRanges object from signal and sort
+    d <- makeGRangesFromDataFrame(d, keep.extra.columns = TRUE)
+    d <- sort(d)
+    seqlevelsStyle(d) <- style
+  }
+
+  return(d)
+}
+
 #' Read CNV file
 #'
 #' Expects tab delimited files similar to PennCNV output. Columns names can be

@@ -101,7 +101,6 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' @param gr A `GRanges` object.
 #' @param type Default `'LRR'`. Other accepted signals are `'BAF'`
 #' @param gene_model A `GRanges` object.
-#' @param plot_gene Default TRUE.
 #' @param ... Other arguemnts passed to `plot`
 #'
 #' @examples
@@ -135,7 +134,7 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' plot_signal(ol, type = 'BAF', gene_model)
 #'
 #' @export
-plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, ...) {
+plot_signal <- function(gr, type = 'LRR', gene_model = NULL, ...) {
   # extract position, x
   d <- as.data.frame(gr)
   x <- as.integer(d$start)
@@ -149,10 +148,7 @@ plot_signal <- function(gr, type = 'LRR', gene_model = NULL, plot_gene = TRUE, .
     message("type should be one of LRR and BAF.")
   }
 
-  if ( plot_gene ) {
-    # stop if gene model is not provided
-    if (is.null(gene_model)) stop("gene_model is required when plot_gene = TRUE.")
-
+  if ( !is.null(gene_model) ) {
     # create a 1 x 2 layout
     layout(matrix(c(1,2)), heights = c(2, 1))
     xlim <- c(min(d$start), max(d$end))
