@@ -128,10 +128,14 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' cnv$gene <- gene
 #'
 #' flank <- 200000
+#' # read cytobands file
+#' fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
+#' cytobands <- read_cytobands(fl)
+#' cytobands <- IRanges::subsetByOverlaps(cytobands, cnv)
 #'
 #' # plot
-#' plot_signal(signal, cnv, flank, type = 'LRR', gene_model)
-#' plot_signal(signal, cnv, flank, type = 'BAF', gene_model)
+#' plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
+#' plot_signal(signal, cnv, flank, type = 'BAF', gene_model, bands = cytobands)
 #'
 #' @export
 plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',

@@ -4,24 +4,33 @@
 \alias{plot_signal}
 \title{Plot Signal}
 \usage{
-plot_signal(gr, type = "LRR", gene_model = NULL, plot_gene = TRUE, ...)
+plot_signal(
+  signal,
+  cnv,
+  flank = 2e+05,
+  type = "LRR",
+  gene_model = NULL,
+  bands = NULL,
+  ...
+)
 }
 \arguments{
-\item{gr}{A `GRanges` object.}
+\item{signal}{A `GRanges` object.}
+
+\item{cnv}{A `GRanges` object.}
 
 \item{type}{Default `'LRR'`. Other accepted signals are `'BAF'`}
 
 \item{gene_model}{A `GRanges` object.}
 
-\item{plot_gene}{Default TRUE.}
+\item{bands}{A `GRanges` object.}
 
 \item{...}{Other arguemnts passed to `plot`}
 }
 \description{
-Plots the position in the `gr` object at the x-axis and a metadata column at
-the y-axis: lrr or baf. When `plot_gene = TRUE` a GRanges object with the
-gene model is expected and plotted using `plot_gene` underneath the signal
-panel.
+Plots the position in the `signal` `GRanges` object at the x-axis and a
+metadata column at the y-axis: lrr or baf. When `plot_gene = TRUE` a `GRanges`
+object with the gene model when provided.
 }
 \examples{
 # get gene model
@@ -46,11 +55,14 @@ cn <- 1
 cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
 cnv$gene <- gene
 
-# get the overlap
-ol <- get_overlap(cnv, signal, flank = 200000)
+flank <- 200000
+# read cytobands file
+fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
+cytobands <- read_cytobands(fl)
+cytobands <- IRanges::subsetByOverlaps(cytobands, cnv)
 
 # plot
-plot_signal(ol, type = 'LRR', gene_model)
-plot_signal(ol, type = 'BAF', gene_model)
+plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
+plot_signal(signal, cnv, flank, type = 'BAF', gene_model, bands = cytobands)
 
 }
