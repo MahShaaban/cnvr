@@ -308,7 +308,7 @@ plot_gene <- function(gr, xlim, ...) {
        frame.plot = FALSE,
        ...)
 
-  axis(2, unique(d$y) - 0.5, labels = levels(d$gene), las = 2)
+  text(1:length(unique(d$gene)), unique(d$y) - 0.5, labels = levels(d$gene), xpd = NA, adj = 1)
 
   # loop over features and plot
   apply(d, 1, function(x) {
