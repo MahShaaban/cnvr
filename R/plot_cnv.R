@@ -170,6 +170,11 @@ plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
 
     points(x, y, ...)
 
+    region <- as.data.frame(cnv)
+    abline(h = 0, lty = 2, col = 'red')
+    abline(h = 0, lty = 2, col = 'red')
+    abline(v = c(region$start, region$end), lty = 2, col = 'red')
+
     # plot gene
     par(mar = c(5,5,.5,1))
     plot_gene(gene_model, xlim)
@@ -181,6 +186,9 @@ plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
     }
 
     points(x, y, ...)
+    abline(h = 0, lty = 2, col = 'red')
+    abline(v = c(GenomicRanges::start(cnv), GenomicRanges::end(cnv)), lty = 2, col = 'red')
+
   }
 }
 
@@ -308,7 +316,9 @@ plot_gene <- function(gr, xlim, ...) {
        frame.plot = FALSE,
        ...)
 
-  text(1:length(unique(d$gene)), unique(d$y) - 0.5, labels = levels(d$gene), xpd = NA, adj = 1)
+  d2 <- subset(d, select = c('start', 'y'))
+  d2 <- aggregate(d2, list(gene = d$gene), min)
+  text(d2$start, d2$y - 0.5, labels = d2$gene, xpd = NA, adj = 1.2)
 
   # loop over features and plot
   apply(d, 1, function(x) {
