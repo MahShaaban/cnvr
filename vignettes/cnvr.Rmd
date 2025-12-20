@@ -21,8 +21,9 @@ library(org.Hs.eg.db)
 ```
 
 ```{r read_cnv}
+# locate and read cnv file
 fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'exon')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
 cnv <- read_cnv(fl, col_names)
 cnv <- cnv[cnv$gene != 'NOT_FOUND']
 ```
@@ -40,47 +41,54 @@ plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
 ```
 
 ```{r get_genemodel}
-# get gene model
-txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
-org <- org.Hs.eg.db
-gene <- 'SLX4IP'
-gene_model <- get_genemodel(txdb, org, gene)
-```
+# cnv
+fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
+col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
+cnv <- read_cnv(fl, col_names)
 
-```{r read_signal}
+sample <- "data-raw/PennCNV/example/offspring.txt"
+cn <- 1
+gene <- "SLX4IP"
+
+cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
+cnv$gene <- gene
+
+flank <- 200000
+
+# get gene model
+gene <- 'SLX4IP'
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
+org <- org.Hs.eg.db::org.Hs.eg.db
+gene_model <- get_genemodel(txdb, org, gene)
+
 # signal
 fl <- system.file('extdata/offspring.txt', package = 'cnvr')
 col_names <- c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
 signal <- read_signal(fl, col_names)
-```
 
-```{r get_overlap}
-sample <- "data-raw/PennCNV/example/offspring.txt"
-cn <- 1
-cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
-cnv$gene <- gene
-
-# get the overlap
-ol <- get_overlap(cnv, signal, flank = 200000)
+# read cytobands file
+fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
+cytobands <- read_cytobands(fl)
+cytobands <- IRanges::subsetByOverlaps(cytobands, cnv)
 ```
 
 ```{r plot_signal_png, echo=FALSE, fig.align = 'center', out.width='70%'}
 lrr <- 'lrr.png'
 png(filename = lrr, width = 5, height = 5, units = 'in', res = 300)
-plot_signal(ol, type = 'LRR', gene_model = gene_model)
+plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
 dev.off()
 knitr::include_graphics(lrr)
 
 baf <- 'baf.png'
 png(filename = baf, width = 5, height = 5, units = 'in', res = 300)
-plot_signal(ol, gene_model, type = 'BAF')
+plot_signal(signal, cnv, flank, type = 'BAF', gene_model, bands = cytobands)
 dev.off()
 knitr::include_graphics(baf)
 ```
 
 
 ```{r plot_signal, eval=FALSE, fig.align = 'center', out.width='70%'}
-plot_signal(ol, type = 'LRR', gene_model = gene_model)
-plot_signal(ol, type = 'BAF',  gene_model = gene_model)
+plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
+plot_signal(signal, cnv, flank, type = 'BAF', gene_model, bands = cytobands)
 ```
 
