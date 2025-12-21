@@ -22,10 +22,12 @@ library(org.Hs.eg.db)
 
 ```{r read_cnv}
 # locate and read cnv file
-fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
-cnv <- read_cnv(fl, col_names)
-cnv <- cnv[cnv$gene != 'NOT_FOUND']
+cnv <- read_cnv(
+  system.file('extdata/family.gene.cnv', package = 'cnvr'),
+  col_names = c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp',
+                'conf', 'gene', 'distance')
+)
+cnv <- cnv[with(cnv, gene != 'NOT_FOUND')]
 ```
 
 ```{r heatmap_png, echo=FALSE, fig.align = 'center', out.width='70%'}
@@ -40,35 +42,30 @@ knitr::include_graphics(hm)
 plot_heatmap(cnv, column_labels = c('father', 'mother', 'offspring'))
 ```
 
-```{r get_genemodel}
+```{r subset_cnv}
 # cnv
-fl <- system.file('extdata/family.gene.cnv', package = 'cnvr')
-col_names <- c('region', 'numsnp', 'length', 'cn', 'sample', 'startsnp', 'endsnp', 'conf', 'gene', 'distance')
-cnv <- read_cnv(fl, col_names)
+cnv <- cnv[with(cnv, sample == "data-raw/PennCNV/example/offspring.txt" & cn == 1 & gene != 'NOT_FOUND')]
+```
 
-sample <- "data-raw/PennCNV/example/offspring.txt"
-cn <- 1
-gene <- "SLX4IP"
-
-cnv <- cnv[cnv$sample == sample & cnv$cn == cn & grepl(gene, cnv$gene)]
-cnv$gene <- gene
-
-flank <- 200000
-
+```{r gene_model}
 # get gene model
-gene <- 'SLX4IP'
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
 org <- org.Hs.eg.db::org.Hs.eg.db
+gene <- unlist(strsplit(cnv$gene, ','))
 gene_model <- get_genemodel(txdb, org, gene)
+```
 
-# signal
-fl <- system.file('extdata/offspring.txt', package = 'cnvr')
-col_names <- c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
-signal <- read_signal(fl, col_names)
+```{r load_signal}
+# load signal
+signal <- read_signal(
+  system.file('extdata/offspring.txt', package = 'cnvr'),
+  col_names = c('name', 'chr', 'pos', 'gt', 'lrr', 'baf')
+)
+```
 
+```{r load_cytobands}
 # read cytobands file
-fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
-cytobands <- read_cytobands(fl)
+cytobands <- read_cytobands(system.file('extdata/hg38.cytoBand.txt', package = 'cnvr'))
 cytobands <- IRanges::subsetByOverlaps(cytobands, cnv)
 ```
 
@@ -86,9 +83,10 @@ dev.off()
 knitr::include_graphics(baf)
 ```
 
-
-```{r plot_signal, eval=FALSE, fig.align = 'center', out.width='70%'}
-plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
-plot_signal(signal, cnv, flank, type = 'BAF', gene_model, bands = cytobands)
+```{r plot_lrr, eval=FALSE, fig.align = 'center', out.width='70%'}
+plot_signal(signal, cnv, flank = 200000, type = 'LRR', gene_model, bands = cytobands)
 ```
 
+```{r plot_baf, eval=FALSE, fig.align = 'center', out.width='70%'}
+plot_signal(signal, cnv, flank = 200000, type = 'BAF', gene_model, bands = cytobands)
+```
