@@ -129,9 +129,13 @@ read_pfb <- function(file, col_names = NULL, as.granges = FALSE, style = 'UCSC',
 #' @importFrom GenomeInfoDb `seqlevelsStyle<-` seqlevelsStyle
 #'
 #' @export
-read_cytobands <- function(file, as.granges = TRUE, style = 'UCSC', ...) {
+read_cytobands <- function(file, col_names = NULL, as.granges = TRUE, style = 'UCSC', ...) {
+  if (is.null(col_names)) {
+    col_names <- c('chrom', 'start', 'end', 'band', 'stain')
+  }
+
   # read tsv file
-  d <- read_tsv(file, col_names = c('chrom', 'start', 'end', 'band', 'stain'))
+  d <- read_tsv(file, col_names = col_names)
 
   if ( as.granges ) {
     # create a GRanges object from signal and sort
