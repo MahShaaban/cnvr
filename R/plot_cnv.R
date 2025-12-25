@@ -131,7 +131,6 @@ plot_heatmap <- function(cnv, top_samples = NULL, top_genes = NULL, ...) {
 #' # read cytobands file
 #' fl <- system.file('extdata/hg38.cytoBand.txt', package = 'cnvr')
 #' cytobands <- read_cytobands(fl)
-#' cytobands <- IRanges::subsetByOverlaps(cytobands, cnv)
 #'
 #' # plot
 #' plot_signal(signal, cnv, flank, type = 'LRR', gene_model, bands = cytobands)
@@ -165,6 +164,7 @@ plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
     par(mar = c(.5,5,5,1))
     plot(x, y, xlim = xlim, xlab = '', xaxt = 'n', type = 'n', ...)
     if ( !is.null(bands) ) {
+      bands <- get_overlap(gr, bands, flank = 0)
       plot_bands(bands)
     }
 
@@ -182,6 +182,7 @@ plot_signal <- function(signal, cnv, flank = 200000, type = 'LRR',
     # plot signal only when plot_gene = FALSE
     plot(x, y, type = 'n', ...)
     if ( !is.null(bands) ) {
+      bands <- get_overlap(gr, bands, flank = 0)
       plot_bands(bands)
     }
 
